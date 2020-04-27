@@ -11,7 +11,7 @@ int main()
     graph.Adj[Vertex{5}] = vector<Vertex>{Vertex{2},Vertex{3},Vertex{4}};
     Graph cycle = graph.GetCycle();
     std::cout << "Hello, World!" << std::endl;
-    std::cout << "Hello from Linux))"<<std::endl;
+    std::cout << "Hello from Ubuntu"<<std::endl;
     return 0;
 }
 
