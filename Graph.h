@@ -46,6 +46,8 @@ public:
     vector<Graph> GetSegments(Graph cycle);
 private:
     Graph FindCycle(vector<Vertex> usedVerticies, Vertex currVertex, Vertex parentVertex);
+
+    Graph FindSegment(Graph cycle, Vertex currVertex, vector<Vertex> usedVerticies);
 };
 
 

@@ -57,8 +57,39 @@ vector<Graph> Graph::GetSegments(Graph cycle)
            {
                if(find(adjacentVeticies.begin(),adjacentVeticies.end(),graphVertex)!=adjacentVeticies.end())
                {
-                    //Create RECURSIVE DFS function to find segments
+                    vector<Vertex> usedVerticies;
+                    usedVerticies.push_back(pair.first);
+                    result.push_back(FindSegment(cycle,graphVertex,usedVerticies));
                }
            }
     }
+}
+
+Graph Graph::FindSegment(Graph cycle, Vertex currVertex, vector<Vertex> usedVerticies)
+{
+    Graph result;
+    usedVerticies.push_back(currVertex);
+    for(auto vertex:Adj[currVertex])
+    {
+        if(find(usedVerticies.begin(),usedVerticies.end(),vertex)==usedVerticies.end())
+        {
+            if(cycle.Adj.count(vertex)==0)
+            {
+                result = FindSegment(cycle, vertex, usedVerticies);
+            }
+            else
+            {
+                int segmentSize = usedVerticies.size();
+                map<Vertex, vector<Vertex>> segmentMap;
+                segmentMap[usedVerticies[0]] = {usedVerticies[1]};
+                segmentMap[usedVerticies[segmentSize-1]] = {usedVerticies[segmentSize-2]};
+                for(int i = 1;i<segmentSize-1;i++)
+                {
+                    segmentMap[usedVerticies[i]] = {usedVerticies[i-1],usedVerticies[i+1]};
+                }
+                result.Adj = segmentMap;
+            }
+        }
+    }
+    return result;
 }
