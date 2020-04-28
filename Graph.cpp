@@ -11,7 +11,7 @@ Graph Graph::GetCycle()
 {
     vector<Vertex> usedVerticies;
 
-    return FindCycle(usedVerticies,Vertex{3},Vertex{-1});
+    return FindCycle(usedVerticies,Vertex{1},Vertex{-1});
 }
 
 Graph Graph::FindCycle(vector<Vertex> usedVerticies, Vertex currVertex, Vertex parentVertex)
@@ -55,7 +55,7 @@ vector<Graph> Graph::GetSegments(Graph cycle)
         vector<Vertex> adjacentVeticies = cycle.Adj[pair.first];
            for(auto graphVertex:Adj[pair.first])
            {
-               if(find(adjacentVeticies.begin(),adjacentVeticies.end(),graphVertex)!=adjacentVeticies.end())
+               if(find(adjacentVeticies.begin(),adjacentVeticies.end(),graphVertex)==adjacentVeticies.end())
                {
                     vector<Vertex> usedVerticies;
                     usedVerticies.push_back(pair.first);
@@ -63,33 +63,35 @@ vector<Graph> Graph::GetSegments(Graph cycle)
                }
            }
     }
+    return result;
 }
 
 Graph Graph::FindSegment(Graph cycle, Vertex currVertex, vector<Vertex> usedVerticies)
 {
     Graph result;
     usedVerticies.push_back(currVertex);
-    for(auto vertex:Adj[currVertex])
+    if(cycle.Adj.count(currVertex)==0)
     {
-        if(find(usedVerticies.begin(),usedVerticies.end(),vertex)==usedVerticies.end())
+        for(auto vertex:Adj[currVertex])
         {
-            if(cycle.Adj.count(vertex)==0)
+            if(find(usedVerticies.begin(),usedVerticies.end(),vertex)==usedVerticies.end())
             {
-                result = FindSegment(cycle, vertex, usedVerticies);
-            }
-            else
-            {
-                int segmentSize = usedVerticies.size();
-                map<Vertex, vector<Vertex>> segmentMap;
-                segmentMap[usedVerticies[0]] = {usedVerticies[1]};
-                segmentMap[usedVerticies[segmentSize-1]] = {usedVerticies[segmentSize-2]};
-                for(int i = 1;i<segmentSize-1;i++)
-                {
-                    segmentMap[usedVerticies[i]] = {usedVerticies[i-1],usedVerticies[i+1]};
-                }
-                result.Adj = segmentMap;
+                result = FindSegment(cycle,vertex,usedVerticies);
+                return result;
             }
         }
     }
-    return result;
+    else
+    {
+        int segmentSize = usedVerticies.size();
+        map<Vertex, vector<Vertex>> segmentMap;
+        segmentMap[usedVerticies[0]] = {usedVerticies[1]};
+        segmentMap[usedVerticies[segmentSize-1]] = {usedVerticies[segmentSize-2]};
+        for(int i = 1;i<segmentSize-1;i++)
+        {
+            segmentMap[usedVerticies[i]] = {usedVerticies[i-1],usedVerticies[i+1]};
+        }
+        result.Adj = segmentMap;
+        return result;
+    }
 }
