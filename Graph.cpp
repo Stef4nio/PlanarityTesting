@@ -18,88 +18,85 @@ Graph Graph::FindCycle(vector<Vertex> usedVerticies, Vertex currVertex, Vertex p
 {
     usedVerticies.push_back(currVertex);
 
-    for(auto vertex: Adj[currVertex])
+    for(auto vertex: AdjList[currVertex])
     {
         if(find(usedVerticies.begin(),usedVerticies.end(),vertex)==usedVerticies.end())
         {
             Graph result = FindCycle(usedVerticies,vertex,currVertex);
-            if(!result.Adj.empty())
+            if(!result.AdjList.empty())
             {
                 return result;
             }
         }
         else if(vertex!=parentVertex)
         {
-            vector<Vertex> cycle;
-            cycle.insert(cycle.begin(),find(usedVerticies.begin(),usedVerticies.end(),vertex),usedVerticies.end());
-            Graph cycleGraph;
+            vector<Vertex> cycleVector;
+            cycleVector.insert(cycleVector.begin(), find(usedVerticies.begin(), usedVerticies.end(), vertex), usedVerticies.end());
+            //Додати внутрішню грань циклу
+            planes.push_back(cycleVector);
+            //Додати зовнішню грань циклу
+            planes.push_back(cycleVector);
             map<Vertex, vector<Vertex>> result;
-            result[cycle[0]] = {cycle[1],cycle[cycle.size()-1]};
-            result[cycle[cycle.size()-1]] = {cycle[0],cycle[cycle.size()-2]};
-            for(int i = 1;i<cycle.size()-1;i++)
+            result[cycleVector[0]] = {cycleVector[1],cycleVector[cycleVector.size()-1]};
+            result[cycleVector[cycleVector.size()-1]] = {cycleVector[0],cycleVector[cycleVector.size()-2]};
+            for(int i = 1;i<cycleVector.size()-1;i++)
             {
-                result[cycle[i]] = {cycle[i-1],cycle[i+1]};
+                result[cycleVector[i]] = {cycleVector[i-1],cycleVector[i+1]};
             }
-            cycleGraph.Adj = result;
-            return cycleGraph;
+            return result;
         }
     }
     return Graph();
 }
 
-vector<Graph> Graph::GetSegments(Graph cycle)
+vector<Segment> Graph::GetSegments(Graph cycle)
 {
-    vector<Graph> result;
-    vector<vector<Vertex>> allSegments;
-    for(auto pair:cycle.Adj)
+    using namespace std;
+    vector<Segment> allSegments;
+    for(auto const& pair:cycle.AdjList)
     {
-        vector<Vertex> adjacentVeticies = cycle.Adj[pair.first];
-           for(auto graphVertex:Adj[pair.first])
+           for(auto graphVertex:AdjList[pair.first])
            {
-               if(find(adjacentVeticies.begin(),adjacentVeticies.end(),graphVertex)==adjacentVeticies.end())
+               if(cycle.AdjList.count(graphVertex)==0)
                {
                     vector<Vertex> usedVerticies;
                     usedVerticies.push_back(pair.first);
-                    vector<Vertex> segment = FindSegment(cycle,graphVertex,usedVerticies);
-                    sort(segment.begin(),segment.end());
+                    Segment segment = FindSegment(cycle,graphVertex,usedVerticies);
                     if(find(allSegments.begin(),allSegments.end(),segment)==allSegments.end())
                     {
                         allSegments.push_back(segment);
-                        int segmentSize = segment.size();
+                        //Segment to graph algorythm
+                        /*int segmentSize = segment.SegmentVector.size();
                         map<Vertex, vector<Vertex>> segmentMap;
                         segmentMap[segment[0]] = {segment[1]};
                         segmentMap[segment[segmentSize-1]] = {segment[segmentSize-2]};
                         for(int i = 1;i<segmentSize-1;i++)
                         {
                            segmentMap[segment[i]] = {segment[i-1],segment[i+1]};
-                        }
-                        Graph segmentGraph;
-                        segmentGraph.Adj = segmentMap;
-                        result.push_back(segmentGraph);
+                        }*/
                     }
                }
            }
     }
-    return result;
+    return allSegments;
 }
 
-vector<Vertex> Graph::FindSegment(Graph cycle, Vertex currVertex, vector<Vertex> usedVerticies)
+Segment Graph::FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex> usedVerticies)
 {
-    vector<Vertex> result;
     usedVerticies.push_back(currVertex);
-    if(cycle.Adj.count(currVertex)==0)
+    if(cycle.AdjList.count(currVertex)==0)
     {
-        for(auto vertex:Adj[currVertex])
+        for(auto vertex:AdjList[currVertex])
         {
             if(find(usedVerticies.begin(),usedVerticies.end(),vertex)==usedVerticies.end())
             {
-                result = FindSegment(cycle,vertex,usedVerticies);
+                Segment result = FindSegment(cycle,vertex,usedVerticies);
                 return result;
             }
         }
     }
     else
     {
-        return usedVerticies;
+        return Segment(usedVerticies);
     }
 }
