@@ -49,10 +49,10 @@ Graph Graph::FindCycle(vector<Vertex> usedVerticies, Vertex currVertex, Vertex p
     return Graph();
 }
 
-vector<Segment> Graph::GetSegments(Graph cycle)
+Segment Graph::GetSegment(Graph cycle)
 {
     using namespace std;
-    vector<Segment> allSegments;
+
     for(auto const& pair:cycle.AdjList)
     {
            for(auto graphVertex:AdjList[pair.first])
@@ -62,23 +62,20 @@ vector<Segment> Graph::GetSegments(Graph cycle)
                     vector<Vertex> usedVerticies;
                     usedVerticies.push_back(pair.first);
                     Segment segment = FindSegment(cycle,graphVertex,usedVerticies);
-                    if(find(allSegments.begin(),allSegments.end(),segment)==allSegments.end())
+                    return segment;
+                    //Segment to graph algorythm
+                    /*int segmentSize = segment.SegmentVector.size();
+                    map<Vertex, vector<Vertex>> segmentMap;
+                    segmentMap[segment[0]] = {segment[1]};
+                    segmentMap[segment[segmentSize-1]] = {segment[segmentSize-2]};
+                    for(int i = 1;i<segmentSize-1;i++)
                     {
-                        allSegments.push_back(segment);
-                        //Segment to graph algorythm
-                        /*int segmentSize = segment.SegmentVector.size();
-                        map<Vertex, vector<Vertex>> segmentMap;
-                        segmentMap[segment[0]] = {segment[1]};
-                        segmentMap[segment[segmentSize-1]] = {segment[segmentSize-2]};
-                        for(int i = 1;i<segmentSize-1;i++)
-                        {
-                           segmentMap[segment[i]] = {segment[i-1],segment[i+1]};
-                        }*/
-                    }
+                       segmentMap[segment[i]] = {segment[i-1],segment[i+1]};
+                    }*/
                }
            }
     }
-    return allSegments;
+    return Segment(vector<Vertex>{Vertex{-1}});
 }
 
 Segment Graph::FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex> usedVerticies)
@@ -99,4 +96,39 @@ Segment Graph::FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex>
     {
         return Segment(usedVerticies);
     }
+}
+
+bool Graph::IsPlanar(Graph cycle)
+{
+    Segment currSegment = GetSegment(cycle);
+    while (currSegment[0].number!=-1)
+    {
+        bool isPlaceForSegmentFound = false;
+        for(auto plane:planes)
+        {
+            bool isStartInPlane = false,isEndInPlane = false;
+            for(auto vertex:plane)
+            {
+                if(vertex==currSegment[0])
+                {
+                    isStartInPlane = true;
+                }
+                else if(vertex == currSegment.SegmentVector.back())
+                {
+                    isEndInPlane = true;
+                }
+            }
+            if(isStartInPlane&&isEndInPlane)
+            {
+                //Place segment into the cycle graph and break proper plane into halves
+                isPlaceForSegmentFound = true;
+            }
+        }
+        if(!isPlaceForSegmentFound)
+        {
+            return false;
+        }
+        currSegment = GetSegment(cycle);
+    }
+    return true;
 }

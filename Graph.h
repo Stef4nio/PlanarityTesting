@@ -83,8 +83,7 @@ public:
     void Init()
     {
         Graph cycle = GetCycle();
-        vector<Segment> segments = GetSegments(cycle);
-        int x = 10;
+        //vector<Segment> segments = GetSegment(cycle);
     }
 private:
     //Сам список зв'язності графа
@@ -95,7 +94,8 @@ private:
     Graph FindCycle(vector<Vertex> usedVerticies, Vertex currVertex, Vertex parentVertex);
     Segment FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex> usedVerticies);
     Graph GetCycle();
-    vector<Segment> GetSegments(Graph cycle);
+    Segment GetSegment(Graph cycle);
+    bool IsPlanar(Graph cycle);
 };
 
 
