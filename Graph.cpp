@@ -120,7 +120,38 @@ bool Graph::IsPlanar(Graph cycle)
             }
             if(isStartInPlane&&isEndInPlane)
             {
-                //Place segment into the cycle graph and break proper plane into halves
+                //Вставити сегмент в цикл
+                int segmentSize = currSegment.SegmentVector.size();
+                cycle.AdjList[currSegment[0]].push_back(currSegment[1]);
+                cycle.AdjList[currSegment[segmentSize-1]].push_back(currSegment[segmentSize-2]);
+                for(int i = 1;i<segmentSize-1;i++)
+                {
+                    cycle.AdjList[currSegment[i]].push_back(currSegment[i-1]);
+                    cycle.AdjList[currSegment[i]].push_back(currSegment[i+1]);
+                }
+                //Розділити відповідну грань на 2
+                vector<Vertex> firstPlane;
+                vector<Vertex> secondPlane;
+
+                vector<Vertex>::iterator segmentStart = currSegment.SegmentVector.begin();
+                vector<Vertex>::iterator segmentEnd = currSegment.SegmentVector.end();
+
+                vector<Vertex>::iterator segmentStartInPlane = find(plane.begin(),plane.end(),currSegment[0]);
+                vector<Vertex>::iterator segmentEndInPlane = find(plane.begin(),plane.end()
+                        ,currSegment.SegmentVector.back());
+
+                firstPlane.insert(firstPlane.begin(),segmentStartInPlane,segmentEndInPlane+1);
+                reverse(segmentStart+1,segmentEnd);
+                firstPlane.insert(firstPlane.end(),segmentStart+1,segmentEnd);
+                reverse(segmentStart+1,segmentEnd);
+
+                secondPlane.insert(secondPlane.begin(),segmentStart,segmentEnd);
+                secondPlane.insert(secondPlane.begin(),plane.begin(),segmentStartInPlane);
+                secondPlane.insert(secondPlane.end(),segmentEndInPlane,plane.end());
+
+                planes.erase(find(planes.begin(),planes.end(),plane));
+                planes.push_back(firstPlane);
+                planes.push_back(secondPlane);
                 isPlaceForSegmentFound = true;
             }
         }
