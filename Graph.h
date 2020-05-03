@@ -80,10 +80,10 @@ public:
         AdjList = map<Vertex,vector<Vertex>>();
     }
 
-    void Init()
+    bool IsPlanar()
     {
         Graph cycle = GetCycle();
-        //vector<Segment> segments = GetSegment(cycle);
+        return CheckPlanarity(cycle);
     }
 private:
     //Сам список зв'язності графа
@@ -95,7 +95,7 @@ private:
     Segment FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex> usedVerticies);
     Graph GetCycle();
     Segment GetSegment(Graph cycle);
-    bool IsPlanar(Graph cycle);
+    bool CheckPlanarity(Graph cycle);
 };
 
 

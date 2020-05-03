@@ -55,9 +55,11 @@ Segment Graph::GetSegment(Graph cycle)
 
     for(auto const& pair:cycle.AdjList)
     {
+        vector<Vertex>::iterator cycleVertexAdjBegin = cycle.AdjList[pair.first].begin();
+        vector<Vertex>::iterator cycleVertexAdjEnd = cycle.AdjList[pair.first].end();
            for(auto graphVertex:AdjList[pair.first])
            {
-               if(cycle.AdjList.count(graphVertex)==0)
+               if(find(cycleVertexAdjBegin,cycleVertexAdjEnd,graphVertex)==cycleVertexAdjEnd)
                {
                     vector<Vertex> usedVerticies;
                     usedVerticies.push_back(pair.first);
@@ -98,7 +100,7 @@ Segment Graph::FindSegment(const Graph &cycle, Vertex currVertex, vector<Vertex>
     }
 }
 
-bool Graph::IsPlanar(Graph cycle)
+bool Graph::CheckPlanarity(Graph cycle)
 {
     Segment currSegment = GetSegment(cycle);
     while (currSegment[0].number!=-1)
@@ -134,25 +136,35 @@ bool Graph::IsPlanar(Graph cycle)
                 vector<Vertex> secondPlane;
 
                 vector<Vertex>::iterator segmentStart = currSegment.SegmentVector.begin();
-                vector<Vertex>::iterator segmentEnd = currSegment.SegmentVector.end();
+                vector<Vertex>::iterator segmentEnd = currSegment.SegmentVector.end()-1;
 
-                vector<Vertex>::iterator segmentStartInPlane = find(plane.begin(),plane.end(),currSegment[0]);
+                vector<Vertex>::iterator segmentStartInPlane = find(plane.begin(),plane.end()
+                        ,currSegment.SegmentVector.front());
                 vector<Vertex>::iterator segmentEndInPlane = find(plane.begin(),plane.end()
                         ,currSegment.SegmentVector.back());
+
+                if(segmentStartInPlane>segmentEndInPlane)
+                {
+                    reverse(segmentStart,segmentEnd+1);
+                    vector<Vertex>::iterator temp = segmentStartInPlane;
+                    segmentStartInPlane = segmentEndInPlane;
+                    segmentEndInPlane = temp;
+                }
 
                 firstPlane.insert(firstPlane.begin(),segmentStartInPlane,segmentEndInPlane+1);
                 reverse(segmentStart+1,segmentEnd);
                 firstPlane.insert(firstPlane.end(),segmentStart+1,segmentEnd);
                 reverse(segmentStart+1,segmentEnd);
 
-                secondPlane.insert(secondPlane.begin(),segmentStart,segmentEnd);
+                secondPlane.insert(secondPlane.begin(),segmentStart,segmentEnd+1);
                 secondPlane.insert(secondPlane.begin(),plane.begin(),segmentStartInPlane);
-                secondPlane.insert(secondPlane.end(),segmentEndInPlane,plane.end());
+                secondPlane.insert(secondPlane.end(),segmentEndInPlane+1,plane.end());
 
                 planes.erase(find(planes.begin(),planes.end(),plane));
-                planes.push_back(firstPlane);
-                planes.push_back(secondPlane);
+                planes.insert(planes.begin(),firstPlane);
+                planes.insert(planes.begin(),secondPlane);
                 isPlaceForSegmentFound = true;
+                break;
             }
         }
         if(!isPlaceForSegmentFound)
